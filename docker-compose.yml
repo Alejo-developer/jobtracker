@@ -1,5 +1,5 @@
-# Starts the database and the API:  docker compose up --build
-# API on http://localhost:8081 (8080 is often taken by XAMPP/Apache on Windows)
+# Starts the database, the API and the board:  docker compose up --build
+# Board on http://localhost:5173 · API on http://localhost:8081 (8080 is often taken by XAMPP/Apache on Windows)
 services:
   db:
     image: postgres:17-alpine
@@ -29,6 +29,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        # The browser calls the API directly, so this is the address seen from your machine
+        VITE_API_URL: http://localhost:8081
+    ports:
+      # Same origin the API allows in CORS_ALLOWED_ORIGINS
+      - "5173:80"
+    depends_on:
+      - api
 
 volumes:
   db-data:

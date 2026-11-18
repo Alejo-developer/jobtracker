@@ -7,15 +7,19 @@ La estoy construyendo por etapas mientras busco trabajo, así que también la us
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![React](https://img.shields.io/badge/React-19-20232A?logo=react&logoColor=61DAFB)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
+![Tablero de JobTracker con datos de ejemplo](docs/tablero.png)
+<sub>Tablero con datos de ejemplo (empresas ficticias).</sub>
 
 ## Hoja de ruta
 
 | Etapa | Qué incluye | Estado |
 |---|---|---|
 | 1 | API REST con Spring Boot y PostgreSQL, validaciones, pruebas y documentación Swagger | ✅ Lista |
-| 2 | Frontend en React: tablero Kanban y estadísticas | ⏳ Siguiente |
-| 3 | Login con Spring Security y JWT; cada usuario ve solo sus postulaciones | Pendiente |
+| 2 | Frontend en React: tablero Kanban con arrastrar y soltar, estadísticas, búsqueda y formulario | ✅ Lista |
+| 3 | Login con Spring Security y JWT; cada usuario ve solo sus postulaciones | ⏳ Siguiente |
 | 4 | Extensión de Chrome para guardar ofertas con un clic | Pendiente |
 | 5 | IA que compara la hoja de vida con cada oferta | Pendiente |
 | 6 | Integración continua con GitHub Actions y despliegue | Pendiente |
@@ -42,6 +46,15 @@ La estoy construyendo por etapas mientras busco trabajo, así que también la us
 - **Filtros combinables** con `Specification` de Spring Data JPA.
 - **Pruebas de integración con Testcontainers**: corren contra un PostgreSQL real en Docker, la misma versión que en producción, no contra una base en memoria.
 
+## Frontend (etapa 2)
+
+- **Tablero Kanban** con cinco columnas. Las tarjetas se arrastran con el ratón, con el dedo (manteniendo pulsado) y con el teclado (espacio para tomar, flechas para mover), gracias a [dnd-kit](https://dndkit.com/). Los movimientos se anuncian al lector de pantalla en español.
+- **Actualización optimista:** al soltar una tarjeta, el tablero cambia al instante y, si la API falla, la tarjeta vuelve a su sitio con un aviso.
+- **Formulario** en un `<dialog>` nativo que muestra cada error de validación de la API debajo de su campo.
+- **Búsqueda** por empresa o cargo, que espera a que dejes de escribir antes de consultar la API.
+- **Estadísticas:** total, enviadas, entrevistas, ofertas y tasa de respuesta.
+- En el celular, las columnas se deslizan de lado una a una.
+
 ## Cómo ejecutarlo
 
 Necesitas **Docker**. Desde la raíz del proyecto:
@@ -50,11 +63,22 @@ Necesitas **Docker**. Desde la raíz del proyecto:
 docker compose up --build
 ```
 
+- **Tablero: http://localhost:5173**
 - API: http://localhost:8081
 - Documentación interactiva (Swagger): http://localhost:8081/swagger-ui.html
 - Estado del servicio: http://localhost:8081/actuator/health
 
 La API usa el puerto 8081 porque en Windows el 8080 suele estar ocupado por XAMPP/Apache.
+
+### Desarrollo del frontend
+
+Con la API corriendo (`docker compose up db api`):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ### Pruebas
 
@@ -69,7 +93,11 @@ Requieren Docker en marcha (Testcontainers levanta PostgreSQL por su cuenta).
 
 ```
 jobtracker/
-├── docker-compose.yml          ← PostgreSQL + API
+├── docker-compose.yml          ← PostgreSQL + API + tablero
+├── frontend/src/
+│   ├── components/             ← tablero, columnas, tarjetas, formulario y estadísticas
+│   ├── useApplications.js      ← estado y llamadas a la API
+│   └── api.js                  ← cliente HTTP
 └── backend/
     └── src/main/java/com/alejandrojimenez/jobtracker/
         ├── jobapplication/     ← entidad, repositorio, servicio, controlador y DTOs
